@@ -89,7 +89,8 @@ class ModeMetaClass(type):
                 mapping[k] = v
                 if v.primary_key:
                     if pm_key:
-                        raise RuntimeError('Duplicate primary key for field: %s' % k)
+                        raise RuntimeError(
+                            'Duplicate primary key for field: %s' % k)
                     pm_key = k
                 else:
                     fields.append(k)
@@ -111,9 +112,10 @@ class ModeMetaClass(type):
 
         attrs['__update__'] = 'update `%s` set %s where `%s`=?' % (
             table_name,
-            ','join(.map(lambda f: '`%s`=?' % (mappings.get(f).name or f), fields)),
+            ', '.join(map(lambda f: '`%s`=?' % (mappings.get(f).name or f), fields)),
             pm_key)
-        attrs['__delete__'] = 'delete from `%s` where `%s`=?' % (table_name, pm_key)
+        attrs['__delete__'] = 'delete from `%s` where `%s`=?' % (
+            table_name, pm_key)
         return type.__new__(cls, name, bases, attrs)
 
 
@@ -139,18 +141,40 @@ class Model(dict, metaclass=ModeMetaClass):
         if value is None:
             field = self.__mappings__[key]
             if field.default is not None:
-                value = field.default() if callable(field.default) else field.default
-                logging.debug('using default alue for %s: %s' % (key, str(value)))
+                value = field.default() if callable(
+                    field.default) else field.default
+                logging.debug('using default alue for %s: %s' %
+                              (key, str(value)))
                 setattr(self, key, value)
         return value
 
     @classmethod
     @asyncio.coroutine
     def find_all(cls, where=None, args=None, **kw):
-        pass
+        ' find objects by where clause. '
+        sql = [cls.__select__]
+        if args is None:
+            args = []
+        if where:
+            sql.append('where %s' % (where))
+        if kw.get('orderBy') is not None:
+            sql.append('order by %s' % (kw['orderBy']))
+        limit = kw.get('limit')
+        if limit:
+            if isinstance(limit, int):
+                sql.append('limit ?')
+                args.append(limit)
+            elif isinstance(limit, tuple) and len(limit) == 2:
+                sql.append('limit ?, ?')
+                args.extend(limit)
+            else:
+                raise ValueError('Invalid limit value: %s' % str(limit))
+        rs = yield from select(' '.join(sql), args)
+        return [cls(**r) for r in rs]
 
+    @classmethod
     @asyncio.coroutine
-    @find_num(cls, where=None, args=None):
+    def find_num(cls, where=None, args=None):
         ' find number by select and where '
         sql = ['select count(*) _num_ from `%s`' % (cls.__table__)]
         if where:
@@ -183,14 +207,16 @@ class Model(dict, metaclass=ModeMetaClass):
         args = list(map(self.get, self.__fields__))
         rows = yield from execute(self.__update__, args)
         if rows != 1:
-            logging.warn('failed to update by primary key: affected rows: %s' % rows)
+            logging.warn(
+                'failed to update by primary key: affected rows: %s' % rows)
 
     @asyncio.coroutine
     def remove(self):
         args = [self.get(self.__primary_key__)]
         rows = yield from execute(self.__delete__, args)
         if rows != 1:
-            logging.warn('failed to remove by primary key: affected rows: %s' % rows)
+            logging.warn(
+                'failed to remove by primary key: affected rows: %s' % rows)
 
 
 class Field(object):
@@ -210,3 +236,25 @@ class StringField(Field):
     def __init__(self, name=None, primary_key=False, default=None,
                  ddl='varchar(100)'):
         super(StringField, self).__init__(name, ddl, primary_key, default)
+
+
+class BooleanField(Field):
+
+    def __init__(self, name=None, default=False):
+        super().__init__(name, 'boolean', False, default)
+
+
+class IntergerField(Field):
+
+    def __init__(self, name=None, primary_key=False, default=0):
+        super().__init__(name, 'biginit', primary_key, default)
+
+
+class FloatField(Field):
+    def __init__(self, name=None, primary_key=False, default=0.0):
+        super().__init__(name, 'real', primary_key, default)
+
+
+class TextField(Field):
+    def __init__(self, name=None, default=None):
+        super().__init__(name, ' text', False, default)
