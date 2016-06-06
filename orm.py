@@ -25,7 +25,7 @@ def create_pool(loop, **kw):
     logging.info('create database connection pool...')
     global __pool
     __pool = yield from aiomysql.create_pool(
-        host=kw.get('host', 'locahost'),
+        host=kw.get('host', 'localhost'),
         port=kw.get('port', 3306),
         user=kw['user'],
         password=kw['password'],
@@ -36,6 +36,14 @@ def create_pool(loop, **kw):
         minsize=kw.get('minsize', 1),
         loop=loop
     )
+
+
+@asyncio.coroutine
+def close_pool():
+    logging.info('close database connection pool...')
+    global __pool
+    __pool.close()
+    yield from __pool.wait_closed()
 
 
 # Select
@@ -70,6 +78,13 @@ def execute(sql, args):
         return affected
 
 
+def create_args_string(num):
+    L = []
+    for n in range(num):
+        L.append('?')
+    return ', '.join(L)
+
+
 class ModeMetaClass(type):
 
     def __new__(cls, name, bases, attrs):
@@ -86,7 +101,7 @@ class ModeMetaClass(type):
         for k, v in attrs.items():
             if isinstance(v, Field):
                 logging.info('    found mapping: %s ==> %s' % (k, v))
-                mapping[k] = v
+                mappings[k] = v
                 if v.primary_key:
                     if pm_key:
                         raise RuntimeError(

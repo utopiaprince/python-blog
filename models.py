@@ -16,7 +16,7 @@ from orm import Model, StringField, BooleanField, FloatField, TextField
 def next_id():
     return '%015d--%s000' % (int(time.time() * 1000), uuid.uuid4().hex)
 
-print(next_id())
+# print(next_id())
 
 
 class User(Model):
@@ -54,24 +54,3 @@ class Comment(Model):
     user_image = StringField(ddl='varchar(500)')
     content = TextField()
     create_at = FloatField(default=time.time)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
