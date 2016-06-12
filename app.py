@@ -1,6 +1,4 @@
 import logging
-logging.basicConfig(level=logging.INFO)
-
 import asyncio
 import os
 import json
@@ -9,6 +7,8 @@ from datetime import datetime
 from aiohttp import web
 from orm import create_pool, close_pool
 from coroweb import add_routes, add_static
+
+logging.basicConfig(level=logging.INFO)
 
 
 def index(request):
@@ -22,6 +22,12 @@ def on_close(app):
 
 def init_jinja2(app, **kw):
     logging.info('init jinja2...')
+    for k, v in kw.items():
+        if isinstance(v, dict):
+            for m, n in v.items():
+                print(' argument %s:%s' % (m, n))
+        else:
+            print('Optional argument %s (*kw):%s' % (k, v))
     options = dict(
         autoescape=kw.get('autoescape', True),
         block_start_string=kw.get('block_start_string', '{%'),
