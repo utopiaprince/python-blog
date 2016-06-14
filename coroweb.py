@@ -1,6 +1,8 @@
 import asyncio
 import os
 import logging
+import inspect
+import functools
 
 
 def get(path):
@@ -60,7 +62,7 @@ def has_var_kw_arg(fn):
             return True
 
 
-def has_request_kw_arg(fn):
+def has_request_arg(fn):
     sig = inspect.signature(fn)
     params = sig.parameters
     found = False
@@ -76,17 +78,81 @@ def has_request_kw_arg(fn):
     return found
 
 
+class APIError(Exception):
+    '''
+    the base APIError which contains error(required), data(optional) and message(optional).
+    '''
+    def __init__(self, error, data='', message=''):
+        super(APIError, self).__init__(message)
+        self.error = error
+        self.data = data
+        self.message = message
+
+
 class RequestHandler(object):
 
     def __init__(self, app, fn):
-        self.app = app
-        self.func = fn
+        self._app = app
+        self._func = fn
+        self._has_request_arg = has_request_arg(fn)
+        self._has_var_kw_arg = has_var_kw_arg(fn)
+        self._has_named_kw_args = has_named_kw_args(fn)
+        self._named_kw_args = get_named_kw_args(fn)
+        self._required_kw_args = get_required_kw_args(fn)
 
     @asyncio.coroutine
     def __call__(self, request):
         kw = None
-        r = yield from self.func(**kw)
-        return r
+        if self._has_var_kw_arg or self._has_named_kw_args or self._required_kw_args:
+            if request.method == 'POST':
+                if not request.content_type:
+                    return web.HTTPBadRequest('Missing Content-Type.')
+                ct = request.content_type.lower()
+                if ct.startswith('application/json'):
+                    params = yield from request.json()
+                    if not isinstance(params, dict):
+                        return web.HTTPBadRequest('JSON body must be object.')
+                    kw = params
+                elif ct.startswith('application/x-www-form-urlencoded') or ct.startswith('multipart/form-data'):
+                    params = yield from request.post()
+                    kw = dict(**params)
+                else:
+                    return web.HTTPBadRequest('Unsupported Content-Type: %s' % request.content_type)
+            if request.method == 'GET':
+                qs = request.query_string
+                if qs:
+                    kw = dict()
+                    for k, v in parse.parse_qs(qs, True).items():
+                        kw[k] = v[0]
+        if kw is None:
+            kw = dict(**request.match_info)
+        else:
+            if not self._has_var_kw_arg and self._named_kw_args:
+                copy = dict()
+                for name in self._named_kw_args:
+                    if name in kw:
+                        copy[name] = kw[name]
+                kw = copy
+            for k, v in request.match_info.items():
+                if k in kw:
+                    logging.warning('Duplicate arg name in named arg and kw args: %s' % k)
+                kw[k] = v
+
+        if self._has_request_arg:
+            kw['request'] = request
+        # check required kw:
+        if self._required_kw_args:
+            for name in self._required_kw_args:
+                if not name in kw:
+                    return web.HTTPBadRequest('Missing argument: %s' % name)
+        logging.info('call with args: %s' % str(kw))
+        try:
+            r = yield from self._func(**kw)
+            return r
+        except APIError as e:
+            return dict(error=e.error, data=e.data, message=e.message)
+        # r = yield from self.func(**kw)
+        # return r
 
 
 def add_static(app):
@@ -102,7 +168,7 @@ def add_route(app, fn):
     if not asyncio.iscoroutinefunction(fn) and not inspect.isgeneratorfunction(fn):
         fn = asyncio.coroutine(fn)
     logging.info('add route %s %s => %s(%s)'
-                 % (method, path, fn.name,
+                 % (method, path, fn.__name__,
                     ', '.join(inspect.signature(fn).parameters.keys())))
     app.router.add_route(method, path, RequestHandler(app, fn))
 

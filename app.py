@@ -8,6 +8,7 @@ from aiohttp import web
 from orm import create_pool, close_pool
 from coroweb import add_routes, add_static
 
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -25,7 +26,7 @@ def init_jinja2(app, **kw):
     for k, v in kw.items():
         if isinstance(v, dict):
             for m, n in v.items():
-                print(' argument %s:%s' % (m, n))
+                print('    argument %s:%s' % (m, n))
         else:
             print('Optional argument %s (*kw):%s' % (k, v))
     options = dict(
@@ -45,7 +46,8 @@ def logger_factory(app, handler):
         # write log
         logging.info('Request: %s %s' % (request.method, request.path))
         if not asyncio.iscoroutinefunction(handler):
-            raise ValueError('handler:%s is not coroutine func' % handler.__name__)
+            raise ValueError(
+                'handler:%s is not coroutine func' % handler.__name__)
         else:
             return (yield from handler(request))
     return logger
@@ -105,11 +107,18 @@ def datetime_filter(t):
     dt = datetime.fromtimestamp(t)
     return u'%s年%s月%s日' % (dt.year, dt.month, dt.day)
 
+
+db_config = {
+    'user': 'www-data',
+    'password': 'www-data',
+    'db': 'awesome'
+}
+
+
 # this is a decorator, the 'init' func is arg
-
-
 @asyncio.coroutine
 def init(loop):
+    yield from create_pool(loop=loop, host='localhost', port=3306, user='www-data', password='www-data', db='awesome')
     app = web.Application(loop=loop, middlewares=[
         logger_factory, response_factory])
     # app.on_shutdown.append(on_close)
@@ -118,8 +127,8 @@ def init(loop):
     add_static(app)
     # app.router.add_route('GET', '/', index)
     handler = app.make_handler()
-    srv = yield from loop.create_server(handler, '127.0.0.1', 9000)
-    logging.info('Server start at http://127.0.0.1:9000...')
+    srv = yield from loop.create_server(handler, '127.0.0.1', 9010)
+    logging.info('Server start at http://127.0.0.1:9010...')
     rs = dict()
     rs['app'] = app
     rs['srv'] = srv

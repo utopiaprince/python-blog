@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # /**
-#  * @brief       : 
+#  * @brief       :
 #  * @file        : handlers.py
 #  * @version     : v0.0.1
 #  * @author      : gang.cheng
@@ -13,3 +13,24 @@
 __author__ = 'gang.cheng'
 
 ' url handlers '
+
+import time
+import json
+import logging
+import hashlib
+import base64
+import asyncio
+
+from coroweb import get, post
+from models import User, Comment, Blog, next_id
+
+
+@get('/')
+@asyncio.coroutine
+def index(request):
+    users = yield from User.find_all()
+    return {
+        '__template__': 'test.html',
+        'users': users
+    }
+
