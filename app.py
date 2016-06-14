@@ -7,7 +7,7 @@ from datetime import datetime
 from aiohttp import web
 from orm import create_pool, close_pool
 from coroweb import add_routes, add_static
-
+from jinja2 import Environment, FileSystemLoader
 
 logging.basicConfig(level=logging.INFO)
 
@@ -37,7 +37,16 @@ def init_jinja2(app, **kw):
         variable_end_string=kw.get('variable_end_string', '}}'),
         auto_reload=kw.get('auto_reload', True)
     )
-
+    path = kw.get('path', None)
+    if path is None:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+    logging.info('set jinja2 template path: %s' % path)
+    env = Environment(loader=FileSystemLoader(path), **options)
+    filters = kw.get('filters', None)
+    if filters is not None:
+        for name, f in filters.items():
+            env.filters[name]= f
+        app['__templating__'] = env
 
 @asyncio.coroutine
 def logger_factory(app, handler):
@@ -127,8 +136,8 @@ def init(loop):
     add_static(app)
     # app.router.add_route('GET', '/', index)
     handler = app.make_handler()
-    srv = yield from loop.create_server(handler, '127.0.0.1', 9010)
-    logging.info('Server start at http://127.0.0.1:9010...')
+    srv = yield from loop.create_server(handler, '127.0.0.1', 9000)
+    logging.info('Server start at http://127.0.0.1:9000...')
     rs = dict()
     rs['app'] = app
     rs['srv'] = srv
