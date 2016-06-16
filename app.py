@@ -45,8 +45,9 @@ def init_jinja2(app, **kw):
     filters = kw.get('filters', None)
     if filters is not None:
         for name, f in filters.items():
-            env.filters[name]= f
+            env.filters[name] = f
         app['__templating__'] = env
+
 
 @asyncio.coroutine
 def logger_factory(app, handler):

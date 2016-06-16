@@ -3,6 +3,7 @@ import os
 import logging
 import inspect
 import functools
+from apis import APIError
 
 
 def get(path):
@@ -76,17 +77,6 @@ def has_request_arg(fn):
             raise ValueError('request parameter must be the last named parameter in function: %s%s' % (
                 fn.__name__, str(sig)))
     return found
-
-
-class APIError(Exception):
-    '''
-    the base APIError which contains error(required), data(optional) and message(optional).
-    '''
-    def __init__(self, error, data='', message=''):
-        super(APIError, self).__init__(message)
-        self.error = error
-        self.data = data
-        self.message = message
 
 
 class RequestHandler(object):
