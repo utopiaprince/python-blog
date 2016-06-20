@@ -64,6 +64,12 @@ def register():
         '__template__': 'register.html'
     }
 
+@get('/signin')
+def signin():
+    return {
+        '__template__': 'signin.html'
+    }
+    
 
 @get('/api/users')
 def api_get_users(*, page='1'):
