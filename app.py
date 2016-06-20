@@ -1,4 +1,7 @@
 import logging
+logging.basicConfig(level=logging.INFO)
+
+
 import asyncio
 import os
 import json
@@ -10,7 +13,8 @@ from coroweb import add_routes, add_static
 from jinja2 import Environment, FileSystemLoader
 from handlers import cookie2user, COOKIE_NAME
 
-logging.basicConfig(level=logging.INFO)
+
+from config.config import configs
 
 
 def index(request):
@@ -107,13 +111,13 @@ def response_factory(app, handler):
             return r
         if isinstance(r, bytes):
             resp = web.Response(body=r)
-            resp.context_type = 'application/octet-stream'
+            resp.content_type = 'application/octet-stream'
             return resp
         if isinstance(r, str):
             if r.startswith('redirect:'):
                 return web.HTTPFound(r[9:])
             resp = web.Response(body=r.encode('utf-8'))
-            resp.context_type = 'text/html;charset=utf-8'
+            resp.content_type = 'text/html;charset=utf-8'
             return resp
         if isinstance(r, dict):
             template = r.get('__template__')
@@ -167,6 +171,7 @@ db_config = {
 @asyncio.coroutine
 def init(loop):
     yield from create_pool(loop=loop, host='localhost', port=3306, user='www-data', password='www-data', db='awesome')
+    # yield from create_pool(loop=loop, **configs.db)
     app = web.Application(loop=loop, middlewares=[
         logger_factory, auth_factory, response_factory])
     # app.on_shutdown.append(on_close)

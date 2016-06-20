@@ -3,6 +3,7 @@ import os
 import logging
 import inspect
 import functools
+from apis import APIError
 
 
 def get(path):

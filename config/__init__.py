@@ -1,6 +1,5 @@
-import os, sys
+import os
+import sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-# os.path.join(os.path.dirname(os.path.abspath(__file__)))
-
-print(sys.path)
+# os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
