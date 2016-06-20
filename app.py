@@ -1,4 +1,7 @@
 import logging
+logging.basicConfig(level=logging.INFO)
+
+
 import asyncio
 import os
 import json
@@ -9,7 +12,8 @@ from orm import create_pool, close_pool
 from coroweb import add_routes, add_static
 from jinja2 import Environment, FileSystemLoader
 
-logging.basicConfig(level=logging.INFO)
+
+from config.config import configs
 
 
 def index(request):
@@ -129,6 +133,7 @@ db_config = {
 @asyncio.coroutine
 def init(loop):
     yield from create_pool(loop=loop, host='localhost', port=3306, user='www-data', password='www-data', db='awesome')
+    # yield from create_pool(loop=loop, **configs.db)
     app = web.Application(loop=loop, middlewares=[
         logger_factory, response_factory])
     # app.on_shutdown.append(on_close)
