@@ -72,11 +72,11 @@ def response_factory(app, handler):
             return r
         if isinstance(r, bytes):
             resp = web.Response(body=r)
-            resp.context_type = 'application/octet-stream'
+            resp.content_type = 'application/octet-stream'
             return resp
         if isinstance(r, str):
             resp = web.Response(body=r.encode('utf-8'))
-            resp.context_type = 'text/html;charset=utf-8'
+            resp.content_type = 'text/html;charset=utf-8'
             return resp
         if isinstance(r, dict):
             template = r.get('__template__')
