@@ -25,7 +25,7 @@ create table users (
 
 create table blogs (
     `id` varchar(60) not null,
-    `user_id` varchar(50) not null,
+    `user_id` varchar(60) not null,
     `user_name` varchar(50) not null,
     `user_image` varchar(500) not null,
     `name` varchar(50) not null,
@@ -38,8 +38,8 @@ create table blogs (
 
 create table comments (
     `id` varchar(60) not null,
-    `blog_id` varchar(50) not null,
-    `user_id` varchar(50) not null,
+    `blog_id` varchar(60) not null,
+    `user_id` varchar(60) not null,
     `user_name` varchar(50) not null,
     `user_image` varchar(500) not null,
     `content` mediumtext not null,
