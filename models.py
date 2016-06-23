@@ -18,7 +18,7 @@ def next_id():
     byte(15+2+32+3)=52 > 50
     alter table users modify id varchar(60);  修改数据库的数据类型
     '''
-    return '%015d--%s000' % (int(time.time() * 1000), uuid.uuid4().hex)
+    return '%015d:%s000' % (int(time.time() * 1000), uuid.uuid4().hex)
 
 # print(next_id())
 
