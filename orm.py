@@ -189,9 +189,9 @@ class Model(dict, metaclass=ModeMetaClass):
 
     @classmethod
     @asyncio.coroutine
-    def find_num(cls, where=None, args=None):
+    def find_num(cls, selectField, where=None, args=None):
         ' find number by select and where '
-        sql = ['select count(*) _num_ from `%s`' % (cls.__table__)]
+        sql = ['select %s _num_ from `%s`' % (selectField, cls.__table__)]
         if where:
             sql.append('where %s' % (where))
         rs = yield from select(' '.join(sql), args, 1)
