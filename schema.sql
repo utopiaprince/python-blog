@@ -1,4 +1,5 @@
 -- schema.sql
+-- mysql -u rot -p < schemal.sql
 
 drop database if exists awesome;
 
@@ -10,7 +11,7 @@ grant select, insert, update, delete on awesome.* to 'www-data'@'localhost'
     identified by 'www-data';
 
 create table users (
-    `id` varchar(50) not null,
+    `id` varchar(60) not null,
     `email` varchar(50) not null,
     `passwd` varchar(50) not null,
     `admin` bool not null,
@@ -23,7 +24,7 @@ create table users (
 ) engine=innodb default charset=utf8;
 
 create table blogs (
-    `id` varchar(50) not null,
+    `id` varchar(60) not null,
     `user_id` varchar(50) not null,
     `user_name` varchar(50) not null,
     `user_image` varchar(500) not null,
@@ -36,7 +37,7 @@ create table blogs (
 ) engine=innodb default charset=utf8;
 
 create table comments (
-    `id` varchar(50) not null,
+    `id` varchar(60) not null,
     `blog_id` varchar(50) not null,
     `user_id` varchar(50) not null,
     `user_name` varchar(50) not null,

@@ -172,8 +172,7 @@ db_config = {
 def init(loop):
     # yield from create_pool(loop=loop, host='localhost', port=3306, user='www-data', password='www-data', db='awesome')
     yield from create_pool(loop=loop, **configs.db)
-    app = web.Application(loop=loop, middlewares=[
-        logger_factory, auth_factory, response_factory])
+    app = web.Application(loop=loop, middlewares=[logger_factory, auth_factory, response_factory])
     # app.on_shutdown.append(on_close)
     init_jinja2(app, filters=dict(datetime=datetime_filter))
     add_routes(app, 'handlers')
