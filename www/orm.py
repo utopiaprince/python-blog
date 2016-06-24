@@ -220,6 +220,7 @@ class Model(dict, metaclass=ModeMetaClass):
     @asyncio.coroutine
     def update(self):
         args = list(map(self.get, self.__fields__))
+        args.append(self.get_value(self.__pm_key__))
         rows = yield from execute(self.__update__, args)
         if rows != 1:
             logging.warn(
