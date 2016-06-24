@@ -227,7 +227,7 @@ class Model(dict, metaclass=ModeMetaClass):
 
     @asyncio.coroutine
     def remove(self):
-        args = [self.get(self.__primary_key__)]
+        args = [self.get(self.__pm_key__)]
         rows = yield from execute(self.__delete__, args)
         if rows != 1:
             logging.warn(
