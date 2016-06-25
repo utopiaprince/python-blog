@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-import os, sys, time ,subprocess
+
+import os
+import sys
+import time
+import subprocess
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -10,7 +14,9 @@ def log(s):
 
 
 class MyFileSystemEventHandler(FileSystemEventHandler):
+
     """docstring for MyFileSystemEventHandler"""
+
     def __init__(self, fn):
         super(MyFileSystemEventHandler, self).__init__()
         self.restart = fn
@@ -28,7 +34,7 @@ process = None
 def kill_process():
     global process
     if process:
-        log('Kill process [%s]' % process.pid)        
+        log('Kill process [%s]' % process.pid)
         process.kill()
         process.wait()
         log('Process ended with code %s.' % process.returncode)
@@ -38,7 +44,8 @@ def kill_process():
 def start_process():
     global process, commond
     log('Start process %s...' % ' '.join(commond))
-    process=subprocess.Popen(commond, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+    process = subprocess.Popen(
+        commond, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
 
 
 def restart_process():
@@ -48,7 +55,8 @@ def restart_process():
 
 def start_watch(path, callback):
     observer = Observer()
-    observer.schedule(MyFileSystemEventHandler(restart_process), path, recursive=True)
+    observer.schedule(
+        MyFileSystemEventHandler(restart_process), path, recursive=True)
     observer.start()
     log('Watching directory %s...' % path)
     start_process()
@@ -70,4 +78,3 @@ if __name__ == '__main__':
     commond = argv
     path = os.path.abspath('.')
     start_watch(path, None)
-
