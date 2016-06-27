@@ -1,5 +1,6 @@
 # use python2.7.8
-import os, re
+import os
+import re
 from datetime import datetime
 
 from fabric.api import *
@@ -19,9 +20,10 @@ db_password = 'www-data'
 ###
 _TAR_FILE = 'dist-awesome.tar.gz'
 
+
 def build():
     includes = ['static', 'templates', 'config', '*.py', '*.sql']
-    excludes = ['test', '.*', '*.pyc', '*.pyo']
+    excludes = ['test', '.*', '*.pyc', '*.pyo', '*/__pycache__/']
     local('rm -f dist/%s' % _TAR_FILE)
     with lcd(os.path.join(os.path.abspath('.'), 'www')):
         cmd = ['tar', '--dereference', '-czvf', '../dist/%s' % _TAR_FILE]
@@ -30,20 +32,20 @@ def build():
         local(' '.join(cmd))
 
 
-
 ###
 # for deploy
 ###
-_REMOTE_TMP_TAR = '/tmp/%s' %_TAR_FILE
+_REMOTE_TMP_TAR = '/tmp/%s' % _TAR_FILE
 _REMOTE_BASE_DIR = '/srv/awesome'
+
 
 def deploy():
     newdir = 'www-%s' % datetime.now().strftime('%y-%m-%d_%H.%M.%S')
-    run('rm -f %s' % _REMOTE_TMP_TAR) 
-    put(('dist/%s' % _TAR_FILE), _REMOTE_TMP_TAR) 
-    with cd(_REMOTE_BASE_DIR):        
+    run('rm -f %s' % _REMOTE_TMP_TAR)
+    put(('dist/%s' % _TAR_FILE), _REMOTE_TMP_TAR)
+    with cd(_REMOTE_BASE_DIR):
         sudo('mkdir %s' % newdir)
-    with cd('%s/%s' %(_REMOTE_BASE_DIR, newdir)): 
+    with cd('%s/%s' % (_REMOTE_BASE_DIR, newdir)):
         sudo('tar -zxvf %s' % _REMOTE_TMP_TAR)
     with cd(_REMOTE_BASE_DIR):
         sudo('rm -f www')
@@ -52,10 +54,7 @@ def deploy():
         sudo('chown -R www-data:www-data %s' % newdir)
     with settings(warn_only=True):
         # why add this command???
-        sudo('supervisord') 
+        sudo('supervisord')
         sudo('supervisorctl stop awesome')
         sudo('supervisorctl start awesome')
         sudo('/etc/init.d/nginx reload')
-
-
-
