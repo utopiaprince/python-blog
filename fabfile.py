@@ -54,7 +54,7 @@ def deploy():
         sudo('chown -R www-data:www-data %s' % newdir)
     with settings(warn_only=True):
         # why add this command???
-        sudo('supervisord')
+        # sudo('supervisord')
         sudo('supervisorctl stop awesome')
         sudo('supervisorctl start awesome')
         sudo('/etc/init.d/nginx reload')
