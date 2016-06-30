@@ -156,10 +156,8 @@ class Model(dict, metaclass=ModeMetaClass):
         if value is None:
             field = self.__mappings__[key]
             if field.default is not None:
-                value = field.default() if callable(
-                    field.default) else field.default
-                logging.debug('using default alue for %s: %s' %
-                              (key, str(value)))
+                value = field.default() if callable(field.default) else field.default
+                logging.debug('using default alue for %s: %s' % (key, str(value)))
                 setattr(self, key, value)
         return value
 
