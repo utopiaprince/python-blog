@@ -176,5 +176,5 @@ def add_routes(app, module_name):
                              % (method, path, fn.__name__,
                                 ', '.join(inspect.signature(fn).parameters.keys())))
                 app.router.add_route(method, path, RequestHandler(app, fn))
-            else:
-                raise ValueError('@get or @post not defined in %s.' % str(fn))
+            # else:
+            #     raise ValueError('@get or @post not defined in %s.' % str(fn))
