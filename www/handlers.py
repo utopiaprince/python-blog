@@ -320,7 +320,7 @@ def api_delete_blog(request, *, id):
     yield from blog.remove()
     comments = yield from Comment.find_all('blog_id=?', [id])
     for c in comments:
-        await c.remove()
+        yield from c.remove()
     return dict(id=id)
 
 
