@@ -45,7 +45,6 @@ def index(*, page='1'):
     page_index = Page.get_index(page)
     num = yield from Blog.find_num('count(id)')
     page = Page(num, page_index)
-
     if num == 0:
         blogs = []
     else:
@@ -319,6 +318,9 @@ def api_delete_blog(request, *, id):
     check_admin(request)
     blog = yield from Blog.find(id)
     yield from blog.remove()
+    comments = yield from Comment.find_all('blog_id=?', [id])
+    for c in comments:
+        await c.remove()
     return dict(id=id)
 
 
