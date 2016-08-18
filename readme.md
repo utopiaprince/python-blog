@@ -29,7 +29,7 @@ server {
     access_log /srv/awesome/log/access_log;
     error_log  /srv/awesome/log/error_log;
 
-    # server_name awesome.liaoxuefeng.com; # 配置域名
+    # server_name awesome.xxx.com; # 配置域名
 
     # 处理静态文件/favicon.ico:
     location /favicon.ico {

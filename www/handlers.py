@@ -58,6 +58,12 @@ def index(*, page='1'):
         'blogs': blogs
     }
 
+@get('/404')
+def not_found():
+    return {
+        '__template__': '404.html'
+    }
+
 
 @get('/register')
 def register():
@@ -243,11 +249,9 @@ def api_register_user(*, email, name, passwd):
     users = yield from User.find_all('email=?', [email])
     if len(users) > 0:
         raise APIError('register:failed', 'email', 'Email is already in use.')
-    uid = next_id()
-    sha1_passwd = '%s:%s' % (uid, passwd)
-    user = User(id=uid, name=name.strip(), email=email, passwd=hashlib.sha1(sha1_passwd.encode('utf-8')).hexdigest(),
-                image='http://www.gravatar.com/avatar/%s?d=mm&s=120' % hashlib.md5(email.encode('utf-8')).hexdigest())
-    yield from user.save()
+    user = User(name=name.strip(), email=email, passwd=passwd,
+        image='http://www.gravatar.com/avatar/%s?d=mm&s=120' % hashlib.md5(email.encode('utf-8')).hexdigest())
+    yield from user.register()
     # make session cookie:
     r = web.Response()
     r.set_cookie(COOKIE_NAME, user.user2cookie(86400), max_age=86400, httponly=True)

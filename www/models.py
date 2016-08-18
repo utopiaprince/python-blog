@@ -12,6 +12,7 @@ import logging
 import time
 import uuid
 import hashlib
+import asyncio
 from orm import Model, StringField, BooleanField, FloatField, TextField
 
 from config.config import configs
@@ -37,6 +38,13 @@ class User(Model):
     name = StringField(ddl='varchar(50)')
     image = StringField(ddl='varchar(500)')
     created_at = FloatField(default=time.time)
+
+    @asyncio.coroutine
+    def register(self):
+        self.id = next_id()
+        sha1_passwd = '%s:%s' %(self.id, self.passwd)
+        self.passwd = hashlib.sha1(sha1_passwd.encode('utf-8')).hexdigest()
+        yield from self.save()
 
 
     # 用户id＋过期时间＋sha1(用户id＋用户口令＋过期时间＋secretkey)
