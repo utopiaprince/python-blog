@@ -1,0 +1,35 @@
+{% extends '__base__.html' %}
+
+{% block title %}404{% endblock %}
+
+{% block beforehead %}
+
+<script type="text/javascript">
+    
+</script>
+
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="error-template">
+                    <h1>Oops!</h1>
+                    <h2>404 Not Found</h2>
+                    <div class="error-details">
+                        Sorry, an error has occured, Requested page not found!
+                    </div>
+                    <div class="error-actions">
+                        <a href="/">
+                            返回主页
+                            <span class="glyphicon glyphicon-home"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

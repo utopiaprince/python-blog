@@ -7,6 +7,7 @@ configs = {
         'db': 'awesome'
     },
     'session': {
+        'name': 'awesession',
         'secret': 'AwEsOmE'
     }
 }
