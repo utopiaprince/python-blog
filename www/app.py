@@ -177,7 +177,6 @@ def init(loop):
     init_jinja2(app, filters=dict(datetime=datetime_filter))
     add_routes(app, 'handlers')
     add_static(app)
-    # app.router.add_route('GET', '/', index)
     handler = app.make_handler()
     srv = yield from loop.create_server(handler, '127.0.0.1', 9000)
     logging.info('Server start at http://127.0.0.1:9000...')

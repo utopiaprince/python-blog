@@ -155,13 +155,10 @@ def add_static(app):
 
 
 def add_routes(app, module_name):
-    n = module_name.rfind('.')
-    if n == -1:
-        mod = __import__(module_name, globals(), locals())
-    else:
-        name = module_name[n + 1:]
-        mod = getattr(
-            __import__(module_name[:n], globals(), globals(), locals(), [name]), name)
+    try:
+        mod = __import__(module_name, fromlist=['get_submodule'])
+    except ImportError as e:
+        raise e
     for attr in dir(mod):
         if attr.startswith('_'):
             continue
@@ -178,3 +175,4 @@ def add_routes(app, module_name):
                 app.router.add_route(method, path, RequestHandler(app, fn))
             # else:
             #     raise ValueError('@get or @post not defined in %s.' % str(fn))
+  

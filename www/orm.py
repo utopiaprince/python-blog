@@ -78,13 +78,6 @@ def execute(sql, args):
         return affected
 
 
-def create_args_string(num):
-    L = []
-    for n in range(num):
-        L.append('?')
-    return ', '.join(L)
-
-
 class ModeMetaClass(type):
 
     def __new__(cls, name, bases, attrs):
@@ -98,10 +91,10 @@ class ModeMetaClass(type):
         mappings = dict()
         fields = []
         pm_key = None
-        for k, v in attrs.items():
+        for k, v in attrs.copy().items():
             if isinstance(v, Field):
-                logging.info('    found mapping: %s ==> %s' % (k, v))
-                mappings[k] = v
+                logging.info('found mapping: %s ==> %s' % (k, v))
+                mappings[k] = attrs.pop(k) # merge add k,v to mapping and remove k,v from attrs.
                 if v.primary_key:
                     if pm_key:
                         raise RuntimeError(
@@ -111,19 +104,18 @@ class ModeMetaClass(type):
                     fields.append(k)
         if not pm_key:
             raise RuntimeError('Primary key not found.')
-        for k in mappings.keys():
-            attrs.pop(k)
+
         escaped_fields = list(map(lambda f: '`%s`' % f, fields))
         attrs['__mappings__'] = mappings
         attrs['__table__'] = table_name
         attrs['__pm_key__'] = pm_key
         attrs['__fields__'] = fields
 
-        attrs['__select__'] = 'select`%s`, %s from `%s`' % (
+        attrs['__select__'] = 'select `%s`, %s from `%s`' % (
             pm_key, ', '.join(escaped_fields), table_name)
         attrs['__insert__'] = 'insert into `%s` (%s, `%s`) values (%s)' % (
             table_name, ', '.join(escaped_fields), pm_key,
-            create_args_string(len(escaped_fields) + 1))
+            ', '.join('?' * (len(escaped_fields) + 1)))
 
         attrs['__update__'] = 'update `%s` set %s where `%s`=?' % (
             table_name,
