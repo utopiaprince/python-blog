@@ -57,7 +57,8 @@ class User(Model):
 
 
     @classmethod
-    async def cookie2user(cls, cookie_str):
+    @asyncio.coroutine
+    def cookie2user(cls, cookie_str):
         '''
         Parse cookie and load user if cookie is valid.
         xxxx--xxxxxx-bbbbbbb-ddddddddddddd
@@ -71,7 +72,7 @@ class User(Model):
             uid, expires, sha1 = L
             if int(expires) < time.time():
                 return None
-            user = await cls.find(uid)
+            user = yield from cls.find(uid)
             if user is None:
                 return None
             s = '%s-%s-%s-%s' % (uid, user.passwd, expires, COOKIE_KEY)
