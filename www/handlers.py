@@ -24,6 +24,7 @@ import asyncio
 
 import markdown2
 
+from pygments import highlight
 from aiohttp import web
 
 from coroweb import get, post
@@ -39,6 +40,17 @@ def check_admin(request):
     if request.__user__ is None or not request.__user__.admin:
         raise APIPermissionError()
 
+def text2html(text):
+    lines = map(lambda s: '<p>%s</p>' % s.replace('&', '&amp;').replace('<',
+                                                                        '&lt;').replace('>', '&gt;'), filter(lambda s: s.strip() != '', text.split('\n')))
+    return ''.join(lines)
+
+def markdown_highlight(content):
+    return re.sub(r'<pre><code>(?P<code>.+?)</code></pre>',
+                  lambda m: highlight(
+                      m.group('code'), PythonLexer(), HtmlFormatter()),
+                  markdown2.markdown(content), flags=re.S)
+
 
 @get('/')
 def index(*, page='1'):
@@ -50,31 +62,20 @@ def index(*, page='1'):
     else:
         blogs = yield from Blog.find_all(orderBy='created_at desc',
                                          limit=(page.offset, page.limit))
-
+    for blog in blogs:
+        blog.html_content = markdown2.markdown(blog.content)
+        # blog.html_content = markdown_highlight(blog.content)
     return {
         '__template__': 'blogs.html',
         'page': page,
         'blogs': blogs
     }
 
+
 @get('/404')
 def not_found():
     return {
         '__template__': '404.html'
-    }
-
-
-@get('/register')
-def register():
-    return {
-        '__template__': 'register.html'
-    }
-
-
-@get('/signin')
-def signin():
-    return {
-        '__template__': 'signin.html'
     }
 
 
@@ -200,7 +201,8 @@ def api_create_comment(id, request, *, content):
     blog = yield from Blog.find(id)
     if blog is None:
         raise APIResourceNotFoundError('Blog')
-    comment = Comment(blog_id=blog.id, user_id=user.id, user_name=user.name, user_image=user.image, content=content.strip())
+    comment = Comment(blog_id=blog.id, user_id=user.id,
+                      user_name=user.name, user_image=user.image, content=content.strip())
     yield from comment.save()
     return comment
 
@@ -249,7 +251,7 @@ def api_register_user(*, email, name, passwd):
     if len(users) > 0:
         raise APIError('register:failed', 'email', 'Email is already in use.')
     user = User(name=name.strip(), email=email, passwd=passwd,
-        image='http://www.gravatar.com/avatar/%s?d=mm&s=120' % hashlib.md5(email.encode('utf-8')).hexdigest())
+                image='http://www.gravatar.com/avatar/%s?d=mm&s=120' % hashlib.md5(email.encode('utf-8')).hexdigest())
     yield from user.register()
     # make session cookie:
     r = web.Response()
@@ -324,9 +326,7 @@ def api_delete_blog(request, *, id):
     return dict(id=id)
 
 
-def text2html(text):
-    lines = map(lambda s: '<p>%s</p>' % s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;'), filter(lambda s: s.strip() != '', text.split('\n')))
-    return ''.join(lines)
+
 
 
 @get('/blog/{id}')

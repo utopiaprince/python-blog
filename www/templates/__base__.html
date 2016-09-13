@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="/static/css/uikit.min.css">
     <link rel="stylesheet" href="/static/css/uikit.gradient.min.css">
     <link rel="stylesheet" href="/static/css/awesome.css" />
+    <link rel="stylesheet" href="/static/css/pygments.css">
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/sha1.min.js"></script>
@@ -65,7 +66,7 @@
                         <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
                             <span class="glyphicon glyphicon-user"> {{ __user__.name }} </span><span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-left">
+                        <ul class="dropdown-menu dropdown-menu-right">
                             {% if __user__.admin %}
                             <li><a href="/manage/blogs/create"><span class="glyphicon glyphicon-pencil"> New Blog</span></a></li>
                             {% endif %}
@@ -106,6 +107,18 @@
         </div>
     </div>
 
+    <script type="text/javascript">
+        $(".dropdown").mouseenter(function(){
+            $(this).addClass("open");
+        });
 
+        $(".dropdown").mouseleave(function() {
+            $(this).removeClass("open");
+        })
+
+    </script>
+
+    {% block script %}
+    {% endblock %}
 </body>
 </html>
