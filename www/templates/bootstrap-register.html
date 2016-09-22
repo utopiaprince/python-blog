@@ -11,23 +11,24 @@ $(function() {
             name: '',
             email: '',
             password1: '',
-            password2: ''
+            password2: '',
+            message:''
         },
         methods: {
             submit: function(event) {
                 event.preventDefault();
                 var $form = $('#vm');
                 if (!this.name.trim()) {
-                    return $form.showFormError('请输入名字');
+                    return showAlert(this, '请输入名字');
                 }
                 if (!validateEmail(this.email.trim().toLowerCase())) {
-                    return $form.showFormError('请输入正确的Email地址');
+                    return showAlert(this, '请输入正确的Email地址');
                 }
                 if (this.password1.length < 6) {
-                    return $form.showFormError('口令长度至少为6个字符');
+                    return showAlert(this, '口令长度至少为6个字符');
                 }
                 if (this.password1 !== this.password2) {
-                    return $form.showFormError('两次输入的口令不一致');
+                    return showAlert(this, '两次输入的口令不一致');
                 }
                 var email = this.email.trim().toLowerCase();
                 $form.postJSON('/api/users', {
@@ -36,7 +37,7 @@ $(function() {
                     passwd: CryptoJS.SHA1(email + ':' + this.password1).toString()
                 }, function(err, r) {
                     if (err) {
-                        return $form.showFormError(err);
+                        return showAlert(vm, err.message || err.data || err);
                     }
                     return location.assign('/');
                 });
@@ -47,19 +48,33 @@ $(function() {
 });
 </script>
 {% endblock %} {% block content %}
-
 <div class="container">
-    <form class="form-vm" id="vm" v-on="submit: submit">
+    <form class="center-block" id="vm" v-on="submit: submit">
         <h2 class="text-center">欢迎注册!</h2>
-        <label class="sr-only" for="name">name</label>
-        <input type="text" name="name" id="name" class="form-control" placeholder="请输入用户名" v-model="name">
-        <label class="sr-only" for="email">email</label>
-        <input type="text" name="email" id="email" class="form-control" placeholder="请输入邮箱" v-model="email">
-        <label class="sr-only" for="password1">password</label>
-        <input class="form-control" id="password1" name="password1" type="password" placeholder="请输入口令" v-model="password1">
-        <label class="sr-only" for="password2">password</label>
-        <input class="form-control" id="password2" name="password2" type="password" placeholder="请重复口令" v-model="password2">
-        <button type="submit" class="btn btn-primary btn-block">submit</button>
+        <div class="alert alert-danger" role="alert" hidden="hidden">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            <span v-text="message"></span>
+        </div>
+        <div class="form-group form-group-lg">
+            <label class="sr-only" for="name">name</label>
+            <input type="text" name="name" id="name" class="form-control" placeholder="请输入用户名" v-model="name">
+        </div>
+        <div class="form-group form-group-lg">
+            <label class="sr-only" for="email">email</label>
+            <input type="text" name="email" id="email" class="form-control" placeholder="请输入邮箱" v-model="email">
+        </div>
+        <div class="form-group form-group-lg">
+            <label class="sr-only" for="password1">password</label>
+            <input class="form-control" id="password1" name="password1" type="password" placeholder="请输入口令" v-model="password1">
+        </div>
+        <div class="form-group form-group-lg">
+            <label class="sr-only" for="password2">password</label>
+            <input class="form-control" id="password2" name="password2" type="password" placeholder="请重复口令" v-model="password2">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-lg btn-block">submit</button>
+        </div>
     </form>
 </div>
 {% endblock %}

@@ -25,12 +25,12 @@ import asyncio
 import markdown2
 
 from pygments import highlight
-from pygments.lexers import PythonLexer
+from pygments.lexers import Python3Lexer
 from pygments.formatters import HtmlFormatter
 from aiohttp import web
 
 from coroweb import get, post
-from apis import APIValueError, APIResourceNotFoundError, Page
+from apis import APIValueError, APIResourceNotFoundError, APIError, Page
 
 from models import User, Comment, Blog, next_id
 
@@ -52,7 +52,7 @@ def text2html(text):
 def markdown_highlight(content):
     return re.sub(r'<pre><code>(?P<code>.+?)</code></pre>',
                   lambda m: highlight(
-                      m.group('code'), PythonLexer(), HtmlFormatter()),
+                      m.group('code'), Python3Lexer(), HtmlFormatter()),
                   markdown2.markdown(content), flags=re.S)
 
 
