@@ -1,0 +1,22 @@
+{% extends 'bootstrap-base.html' %} {% block title %}日志{% endblock %} {% block beforehead %}
+<script type="text/javascript">
+</script>
+{% endblock %} {% block content %}
+<main class="container">
+    <div class="col-md-9 col-xm-12">
+        {% for blog in blogs %}
+        <article class="article">
+            <h2 class="modal-title"><a href="/blog/{{blog.id}}">{{blog.name}}</a></h2>
+            <p><small>发表于{{blog.created_at | datetime}}</small></p>
+            <p>{{blog.summary|safe}}</p>
+        </article>
+        <hr class="divider"> {% endfor %} {{pagination('/?page=', page)}}
+    </div>
+    <div class="col-md-3 col-xs-3 h1 text-center">
+        {% if __user__ %}
+        <img src="{{__user__.image}}" alt="user_image" class="img-thumbnail img-respinsuve" width="120" height="120"> {% else %}
+        <img src="/static/img/user.png" alt="user_image" class="img-thumbnail img-respinsuve" width="120" height="120" /> {% endif %}
+        <p class="h4"><a href="https://github.com/utopiaprince">spongeman</a></p>
+    </div>
+</main>
+{% endblock %}

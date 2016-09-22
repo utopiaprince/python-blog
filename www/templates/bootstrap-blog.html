@@ -1,0 +1,80 @@
+{% extends 'bootstrap-base.html' %} 
+
+{% block title %}{{ blog.name }}{% endblock %} 
+
+{% block beforehead %}
+
+<script type="text/javascript">
+var comment_url = '/api/blogs/{{blog.id}}/comments';
+$(function() {
+    var $form = $('#vm');
+    $form.submit(function(e) {
+        e.preventDefault();
+        $form.showFormError('');
+        var content = $form.find('textarea').val().trim();
+        if (content === '') {
+            return $form.showFormError('请输入评论内容！');
+        }
+        $form.postJSON(comment_url, {
+            content: content
+        }, function(err, result) {
+            if (err) {
+                return $form.showFormError(err);
+            }
+            refresh();
+        });
+    });
+    $('#vm').show();
+});
+</script>
+{% endblock %} 
+{% block content %}
+<main class="container">
+    <div class="row">
+        <div class="col-md-9 col-sm-9">
+            <article class="article">
+                <h3><a href="/blog/{{blog.id}}">{{blog.name}}</a></h3>
+                <p class="meta"><small>发表于 {{blog.created_at|datetime}}</small></p>
+                <p>{{ blog.html_content|safe }}</p>
+                <hr class="divider" />
+            </article>
+            <div class="container col-md-12 col-sm-12">
+                <h4>发表评论</h4>
+                <form class="form" id="vm" v-on="submit: submit">
+                    <label class="sr-only" for="content">content</label>
+                    <textarea class="form-control" rows="6" id="content" name="content" placeholder="说点什么吧" v-model="contentclass=" form-control " "></textarea>
+                    <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-comment"></i>发表评论</button>
+                </form>
+                <hr class="divider" />
+                <h4>最新评论</h4>
+                <ul class="media-list">
+                    {% for c in comments %}
+                    <li class="media">
+                        <div class="media-left">
+                            <img class="media-object img-thumbnail" src="{{c.user_image}}" alt="user_image" width="100" height="100" />
+                        </div>
+                        <div class="media-body">
+                            <h4 class="media-heading">{{ c.user_name }} {% if c.user_id==blog.user_id %}(作者){% endif %}</h4>
+                            <small>{{ c.created_at|datetime }}</small>
+                            <hr class="divider">
+                            <article>
+                                <p>{{c.html_content|safe}}</p>
+                            </article>
+                        </div>
+                        <hr class="divider">
+                    </li>
+                    {% else %}
+                    <p>还没有人评论...</p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-3 col-xs-3 h1 text-center">
+            {% if __user__ %}
+            <img src="{{__user__.image}}" alt="user_image" class="img-thumbnail img-respinsuve" width="120" height="120"> {% else %}
+            <img src="/static/img/user.png" alt="user_image" class="img-thumbnail img-respinsuve" width="120" height="120" /> {% endif %}
+            <h3>{{ blog.user_name }}</h3>
+        </div>
+    </div>
+</main>
+{% endblock %}

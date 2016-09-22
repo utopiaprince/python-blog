@@ -25,6 +25,8 @@ import asyncio
 import markdown2
 
 from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
 from aiohttp import web
 
 from coroweb import get, post
@@ -40,10 +42,12 @@ def check_admin(request):
     if request.__user__ is None or not request.__user__.admin:
         raise APIPermissionError()
 
+
 def text2html(text):
-    lines = map(lambda s: '<p>%s</p>' % s.replace('&', '&amp;').replace('<',
-                                                                        '&lt;').replace('>', '&gt;'), filter(lambda s: s.strip() != '', text.split('\n')))
+    lines = map(lambda s: '<p>%s</p>' % s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;'), 
+        filter(lambda s: s.strip() != '', text.split('\n')))
     return ''.join(lines)
+
 
 def markdown_highlight(content):
     return re.sub(r'<pre><code>(?P<code>.+?)</code></pre>',
@@ -63,10 +67,10 @@ def index(*, page='1'):
         blogs = yield from Blog.find_all(orderBy='created_at desc',
                                          limit=(page.offset, page.limit))
     for blog in blogs:
-        blog.html_content = markdown2.markdown(blog.content)
-        # blog.html_content = markdown_highlight(blog.content)
+        # blog.summary = markdown_highlight(blog.summary)
+        blog.html_content = markdown_highlight(blog.content)
     return {
-        '__template__': 'blogs.html',
+        '__template__': 'bootstrap-blogs.html',
         'page': page,
         'blogs': blogs
     }
@@ -82,14 +86,14 @@ def not_found():
 @get('/register')
 def register():
     return {
-        '__template__': 'register.html'
+        '__template__': 'bootstrap-register.html'
     }
 
 
 @get('/signin')
 def signin():
     return {
-        '__template__': 'signin.html'
+        '__template__': 'bootstrap-signin.html'
     }
 
 
@@ -326,18 +330,15 @@ def api_delete_blog(request, *, id):
     return dict(id=id)
 
 
-
-
-
 @get('/blog/{id}')
 def get_blog(id):
     blog = yield from Blog.find(id)
     comments = yield from Comment.find_all('blog_id=?', [id], orderBy='created_at desc')
     for c in comments:
         c.html_content = text2html(c.content)
-    blog.html_content = markdown2.markdown(blog.content)
+    blog.html_content = markdown_highlight(blog.content)
     return {
-        '__template__': 'blog.html',
+        '__template__': 'bootstrap-blog.html',
         'blog': blog,
         'comments': comments
     }

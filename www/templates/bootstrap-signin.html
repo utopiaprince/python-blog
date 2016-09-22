@@ -1,0 +1,50 @@
+{% extends 'bootstrap-base.html' %} {% block title %}登录{% endblock %} {% block beforehead %}
+<script>
+$(function() {
+    var vmAuth = new Vue({
+        el: '#vm-signin',
+        data: {
+            email: '',
+            passwd: ''
+        },
+        methods: {
+            submit: function(event) {
+                event.preventDefault();
+                var
+                    $form = $('#vm-signin'),
+                    email = this.email.trim().toLowerCase(),
+                    data = {
+                        email: email,
+                        passwd: this.passwd === '' ? '' : CryptoJS.SHA1(email + ':' + this.passwd).toString()
+                    };
+                $form.postJSON('/api/authenticate', data, function(err, result) {
+                    if (!err) {
+                        location.assign('/');
+                    }
+                });
+            }
+        }
+    });
+    $('#vm-signin').show();
+});
+</script>
+{% endblock %} 
+
+{% block content %}
+<div class="container">
+    <form id="vm-signin" class="form-vm" v-on="submit: submit">
+        <h2 class="text-center">欢迎登录！</h2>
+        <label class="sr-only" for="email">email</label>
+        <div class="form-inline form-group">
+            <i class="glyphicon glyphicon-envelope"></i>
+            <input type="email" name="email" id="email" placeholder="电子邮件" maxlength="50" class="form-control" v-model="email">
+        </div>
+        <label class="sr-only" for="passwd">passwd</label>
+        <div class="form-inline form-group">
+            <i class="glyphicon glyphicon-asterisk"></i>
+            <input type="password" name="passwd" placeholder="口令" maxlength="50" id="passwd" class="form-control" v-model="passwd">
+        </div>
+        <button class="btn btn-primary btn-block">submit</button>
+    </form>
+</div>
+{% endblock %}
