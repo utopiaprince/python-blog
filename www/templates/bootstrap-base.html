@@ -1,26 +1,26 @@
-<!DOCTYPE html>
-
-{% macro pagination(url, page) %}
-    <ul class="uk-pagination">
-        {% if page.has_previous %}
-            <li><a href="{{ url }}{{ page.page_index - 1 }}"><i class="uk-icon-angle-double-left"></i></a></li>
-        {% else %}
-            <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
-        {% endif %}
-            <li class="uk-active"><span>{{ page.page_index }}</span></li>
-        {% if page.has_next %}
-            <li><a href="{{ url }}{{ page.page_index + 1 }}"><i class="uk-icon-angle-double-right"></i></a></li>
-        {% else %}
-            <li class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
-        {% endif %}
-    </ul>
+<!DOCTYPE html> {% macro pagination(url, page) %}
+<div class="container text-center">
+    <nav>
+        <ul class="pager">
+            {% if page.has_previous %}
+            <li class=""><a href="{{ url }}{{ page.page_index - 1 }}">&laquo; Older</a></li>
+            {% else %}
+            <li class=" disabled"><a href="#">&laquo; Older</a></li>
+            {% endif %}
+            <li class="active"><a>{{ page.page_index }}</a></li>
+            {% if page.has_next %}
+            <li class=""><a href="{{ url }}{{ page.page_index + 1 }}">Newer &raquo;</a></li>
+            {% else %}
+            <li class=" disabled"><a href="#">Newer &raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
 {% endmacro %}
-
 <html>
 
 <head>
-    <meta charset="utf-8" /> 
-    {% block meta %}
+    <meta charset="utf-8" /> {% block meta %}
     <!-- block meta  -->
     {% endblock %}
     <title>{% block title %} ? {% endblock %} - Spongeman Blog</title>
@@ -38,7 +38,7 @@
     <script src="/static/js/awesome.js"></script>
     <script src="/static/js/mblog.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-<!--     <style>
+    <!--     <style>
     body {
         padding-top: 60px;
     }
@@ -90,16 +90,19 @@
         </div>
         <div style="height: 50px;"></div>
         <!-- content -->
-        {% block content %}
-        {% endblock %}
+        {% block content %} {% endblock %}
         <!-- // content -->
-        
         <footer id="footer">
             <div class="container text-center">
-                <p>Powered by <a href="http://v3.bootcss.com/">Bootrasp</a></p>
+                <p>Powered by <a href="http://v3.bootcss.com/">Bootsrasp</a></p>
             </div>
         </footer>
+        <div class="container text-center container-center">
+            <div class="bottom panel">
+                <a target="_blank" href="http://www.w3.org/TR/html5/"><i class="uk-icon-html5" style="font-size:64px; color: #444;"></i></a>
+            </div>
             
+        </div>
     </div>
     <script type="text/javascript">
     $(".dropdown").mouseenter(function() {

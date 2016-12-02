@@ -13,22 +13,19 @@ $(function() {
                 event.preventDefault();
                 var $form = $('#vm-signin');
                 var email = this.email.trim().toLowerCase();
-                if (!this.email)
-                {
+                if (!this.email) {
                     return showAlert(this, "请输入email！");
                 }
                 var data = {
-                        email: email,
-                        passwd: this.passwd === '' ? '' : CryptoJS.SHA1(email + ':' + this.passwd).toString()
-                    };
+                    email: email,
+                    passwd: this.passwd === '' ? '' : CryptoJS.SHA1(email + ':' + this.passwd).toString()
+                };
                 $form.postJSON('/api/authenticate', data, function(err, result) {
                     if (!err) {
                         location.assign('/');
-                    }
-                    else
-                    {
+                    } else {
                         console.log(err);
-                        return showAlert(vmAuth, err.message||err.data||err);
+                        return showAlert(vmAuth, err.message || err.data || err);
                     }
                 });
             }
